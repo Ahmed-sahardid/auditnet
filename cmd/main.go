@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/ahmedsahardid/auditnet/internal/auth"
 )
@@ -43,6 +44,20 @@ func main() {
 		fmt.Fprintln(w, "🛠️ Admin Panel - Welcome Admin")
 	}))
 
+	// ✅ Move this ABOVE the server start
+	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "user",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			Expires:  time.Unix(0, 0),
+			HttpOnly: true,
+		})
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	})
+
+	// ✅ Start server LAST
 	fmt.Println("Server running at http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
